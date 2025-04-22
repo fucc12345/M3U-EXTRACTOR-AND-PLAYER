@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stream Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #video-container {
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="video-container" class="p-4">
+    <video id="video" controls></video>
+  </div>
+
+  <script>
+    // Get the URL from the query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const streamUrl = urlParams.get('url');
+
+    if (!streamUrl) {
+      alert("No stream URL provided.");
+      window.location.href = '/';
+    } else {
+      // Proxy the stream URL
+      const proxyUrl = `proxy.php?url=${encodeURIComponent(streamUrl)}`;
+
+      // Initialize video player for m3u8 stream
+      const video = document.getElementById('video');
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(proxyUrl); // Use proxy URL here
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // If HLS.js is not supported, try native support in browsers like Safari
+        video.src = proxyUrl; // Use proxy URL here
+        video.addEventListener('loadedmetadata', function () {
+          video.play();
+        });
+      } else {
+        alert("Your browser does not support HLS streaming.");
+      }
+    }
+  </script>
+
+</body>
+</html>

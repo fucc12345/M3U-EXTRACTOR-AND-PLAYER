@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Playlist Channel Extractor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-6">
+    <h1 class="text-3xl font-bold mb-4 text-center text-blue-700">📺 Playlist Channel Extractor</h1>
+
+    <label class="block mb-2 text-lg font-medium text-gray-700" for="playlistUrl">Enter Playlist URL:</label>
+    <input type="text" id="playlistUrl" placeholder="https://example.com/playlist.m3u or .m3u8"
+      class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+    <button onclick="fetchPlaylistChannels()"
+      class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition mb-6">Extract Channels</button>
+
+    <!-- Search input -->
+    <label class="block mb-2 text-lg font-medium text-gray-700" for="search">Search Channels:</label>
+    <input type="text" id="search" placeholder="Search by name" 
+      class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      oninput="filterChannels()" />
+
+    <div id="channels" class="space-y-3"></div>
+
+    <!-- Coded with Love message -->
+    <div class="mt-6 text-center text-gray-500 text-sm">
+      <p>Coded with ❤️ by Techie</p>
+      <p class="mt-2">Make sure your browser supports HLS streaming.</p>
+    </div>
+  </div>
+
+  <script>
+    let channels = []; // Global variable to store the extracted channels
+
+    function fetchPlaylistChannels() {
+      const url = document.getElementById('playlistUrl').value.trim();
+      if (!url) {
+        alert("Please enter a URL.");
+        return;
+      }
+
+      const encodedUrl = encodeURIComponent(url);
+      const proxyUrl = `proxy.php?url=${encodedUrl}`;
+
+      fetch(proxyUrl)
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to fetch playlist.");
+          return res.text();
+        })
+        .then(data => {
+          const lines = data.split('\n');
+          channels = [];
+          let currentChannelName = '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+
+            // Match EXTINF lines for channel info (name and metadata)
+            if (trimmedLine.startsWith('#EXTINF')) {
+              // Extract the channel name (after comma)
+              currentChannelName = trimmedLine.split(',')[1] || 'Unnamed Channel';
+            }
+
+            // Match media stream URLs (for channel playback)
+            else if (trimmedLine && !trimmedLine.startsWith('#')) {
+              if (currentChannelName) {
+                channels.push({
+                  name: currentChannelName,
+                  url: trimmedLine
+                });
+              }
+            }
+          }
+
+          // Display the extracted channels and URLs
+          displayChannels();
+        })
+        .catch(err => {
+          alert("Error fetching or parsing the playlist. Please check the URL.");
+          console.error(err);
+        });
+    }
+
+    function displayChannels() {
+      const container = document.getElementById('channels');
+      container.innerHTML = "";
+
+      if (channels.length === 0) {
+        container.innerHTML = `<div class="text-red-600 font-semibold">No channels found in the playlist.</div>`;
+        return;
+      }
+
+      channels.forEach((channel, index) => {
+        const div = document.createElement('div');
+        div.className = 'bg-gray-100 p-3 border rounded-lg break-words';
+        div.innerHTML = `
+          <div class="text-gray-700 font-semibold">${channel.name}</div>
+          <div class="flex justify-between items-center">
+            <a href="${channel.url}" target="_blank" class="text-blue-600 hover:underline">Watch Now</a>
+            <div class="flex space-x-4">
+              <button onclick="playInNewTab('${channel.url}')" class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600">Play in New Tab</button>
+              <button onclick="copyToClipboard('${channel.url}')" class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">Copy to Clipboard</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function filterChannels() {
+      const searchQuery = document.getElementById('search').value.toLowerCase();
+      const filteredChannels = channels.filter(channel => 
+        channel.name.toLowerCase().includes(searchQuery)
+      );
+      const container = document.getElementById('channels');
+      container.innerHTML = ""; // Clear the current list
+      filteredChannels.forEach((channel, index) => {
+        const div = document.createElement('div');
+        div.className = 'bg-gray-100 p-3 border rounded-lg break-words';
+        div.innerHTML = `
+          <div class="text-gray-700 font-semibold">${channel.name}</div>
+          <div class="flex justify-between items-center">
+            <a href="${channel.url}" target="_blank" class="text-blue-600 hover:underline">Watch Now</a>
+            <div class="flex space-x-4">
+              <button onclick="playInNewTab('${channel.url}')" class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600">Play in New Tab</button>
+              <button onclick="copyToClipboard('${channel.url}')" class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">Copy to Clipboard</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function playInNewTab(url) {
+      // Now the URL is redirected to the new index2.html page via the proxy
+      const newTabUrl = `index2.html?url=${encodeURIComponent(url)}`;
+      const newTab = window.open(newTabUrl, '_blank');
+      newTab.focus();
+    }
+
+    function copyToClipboard(url) {
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          alert('URL copied to clipboard!');
+        })
+        .catch(err => {
+          console.error('Error copying to clipboard:', err);
+        });
+    }
+  </script>
+</body>
+</html>
