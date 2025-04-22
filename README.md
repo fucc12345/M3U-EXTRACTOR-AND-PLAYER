@@ -9,6 +9,12 @@ For Android devices, we suggest **OTT Navigator** 📱 and **Tivimate** 📲.
 
 ---
 
+## 🔗 Convert Xtream to M3U
+If you want to convert **Xtream** to **M3U** and play them locally, you can use the following tool:  
+- **[Xtream to M3U](https://github.com/Tparag/Xtream-to-M3U)**
+
+---
+
 ## 🛠️ Key Features:
 - ✅ **Supports All Playlist Formats:** Fully compatible with m3u, m3u8, and a variety of other playlist formats! 🔄
 - ✅ **Accurate Channel Parsing:** Get the most precise channel IDs and details, ensuring flawless streaming with no interruptions. 🔍
@@ -31,6 +37,12 @@ For Android devices, we suggest **OTT Navigator** 📱 and **Tivimate** 📲.
 - ✅ **Proxy-Enabled for Seamless Access:** Stream content freely without worrying about restrictions or CORS-related issues. 🌐
 - ✅ **Fast & Lightweight:** Designed for optimal speed and minimal resource usage, ensuring smooth streaming without lag. ⚡
 - ✅ **User-Friendly Interface:** Clean, modern, and intuitive design ensures a hassle-free experience for all users. ✨
+
+---
+
+## 📝 Stalker to M3U (For MAC, MAG 250 Only)
+For converting **Stalker** to **M3U** on **Mac** (MAG 250 only supported), you can use this tool:  
+- **[Stalker to M3U (MAG 250)](https://github.com/Tparag/Stalker-to-M3U)**
 
 ---
 
